@@ -23,7 +23,15 @@ logger = logging.getLogger(__name__)
 class HeuristicReranker:
     """无模型 CrossEncoder 的可解释替代：词面覆盖 + 标题/要点命中 + 场景先验。"""
 
-    def score(
+    def score_many(
+        self, query: str, docs: list[dict[str, Any]], base_scores: list[float], audience: str
+    ) -> list[float]:
+        return [
+            self._score_one(query, doc, base, audience)
+            for doc, base in zip(docs, base_scores, strict=True)
+        ]
+
+    def _score_one(
         self, query: str, doc: dict[str, Any], base_score: float, audience: str
     ) -> float:
         query_tokens = set(tokenize(query))
@@ -53,17 +61,28 @@ class HeuristicReranker:
 
 
 class BgeReranker:
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, device: str | None = None):
         from sentence_transformers import CrossEncoder
 
-        self.model = CrossEncoder(model_name)
+        if device == "auto":
+            import torch
 
-    def score(self, query: str, doc: dict[str, Any], base_score: float, audience: str) -> float:
-        pair = (query, f"{doc.get('title', '')}\n{doc.get('text', '')}")
-        raw = float(self.model.predict([pair], show_progress_bar=False)[0])
+            device = "mps" if torch.backends.mps.is_available() else None
+        self.model = CrossEncoder(model_name, device=device)
+
+    def score_many(
+        self, query: str, docs: list[dict[str, Any]], base_scores: list[float], audience: str
+    ) -> list[float]:
+        if not docs:
+            return []
+        pairs = [(query, f"{doc.get('title', '')}\n{doc.get('text', '')}") for doc in docs]
+        raw = self.model.predict(pairs, show_progress_bar=False)
         # CrossEncoder 输出 logits，用 sigmoid 归一到 0-1
-        normalized = 1.0 / (1.0 + np.exp(-raw))
-        return 0.85 * normalized + 0.15 * base_score
+        normalized = 1.0 / (1.0 + np.exp(-np.asarray(raw, dtype=np.float32)))
+        return [
+            0.85 * float(score) + 0.15 * base
+            for score, base in zip(normalized, base_scores, strict=True)
+        ]
 
 
 class Retriever:
@@ -88,7 +107,7 @@ class Retriever:
     def _build_reranker(self):
         if self.settings.reranker_backend == "bge":
             try:
-                return BgeReranker(self.settings.reranker_model)
+                return BgeReranker(self.settings.reranker_model, device=self.settings.reranker_device)
             except Exception as exc:
                 logger.warning("BGE reranker 加载失败，使用启发式：%s", exc)
         return HeuristicReranker()
@@ -96,7 +115,12 @@ class Retriever:
     def _ensure_index(self, auto_build: bool) -> None:
         manifest = read_manifest()
         count = self.store.count()
-        stale = bool(manifest) and manifest.get("chunks") != len(self.chunks)
+        stale = bool(manifest) and (
+            manifest.get("chunks") != len(self.chunks)
+            or manifest.get("dim") != self.embedder.dim
+            or manifest.get("embedding_backend") != self.settings.embedding_backend
+            or manifest.get("collection") != self.store.collection
+        )
         if manifest and not stale and count >= len(self.chunks):
             return
         if not auto_build:
@@ -163,7 +187,7 @@ class Retriever:
         max_dense = max(dense_scores.values(), default=1.0) or 1.0
 
         query_tokens = set(tokenize(query))
-        candidates: list[tuple[float, dict[str, Any]]] = []
+        rows: list[tuple[float, dict[str, Any]]] = []
         for chunk_id in ranked_ids[: settings.top_k_dense + settings.top_k_sparse]:
             chunk = self._by_id.get(chunk_id)
             if not chunk:
@@ -187,10 +211,12 @@ class Retriever:
                 0.65 * sparse_scores.get(chunk_id, 0.0) / max_sparse
                 + 0.35 * dense_scores.get(chunk_id, 0.0) / max_dense
             )
-            base = 0.7 * base + 0.3 * (fused[chunk_id] / max_rrf)
-            rerank = self.reranker.score(query, chunk, base, audience)
-            candidates.append((rerank, chunk))
+            rows.append((0.7 * base + 0.3 * (fused[chunk_id] / max_rrf), chunk))
 
+        reranked = self.reranker.score_many(
+            query, [chunk for _, chunk in rows], [base for base, _ in rows], audience
+        )
+        candidates = list(zip(reranked, [chunk for _, chunk in rows], strict=True))
         candidates.sort(key=lambda item: item[0], reverse=True)
 
         # 同文档去重，保证引用多样性；不足时再回填

@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     embedding_dim: int = 512
     reranker_backend: Literal["heuristic", "bge"] = "heuristic"
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    reranker_device: str = "auto"
     qdrant_url: str = ""
     qdrant_api_key: str = ""
     qdrant_path: str = "data/qdrant"

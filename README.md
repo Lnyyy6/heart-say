@@ -96,9 +96,14 @@ docker compose -f deploy/docker-compose.yml up --build
 ```bash
 .venv/bin/pip install "sentence-transformers==3.3.1"
 EMBEDDING_BACKEND=bge-m3 EMBEDDING_DEVICE=auto make index   # 首次下载约 2GB 权重
+
+# 可选：真实 CrossEncoder Rerank（权重约 2.3GB）
+.venv/bin/python -c "from huggingface_hub import snapshot_download; snapshot_download('BAAI/bge-reranker-v2-m3', local_dir='outputs/bge-reranker-v2-m3')"
+EMBEDDING_BACKEND=bge-m3 RERANKER_BACKEND=bge RERANKER_MODEL=outputs/bge-reranker-v2-m3 \
+  PYTHONPATH=src .venv/bin/python -m heart_say.evaluation.runner --name rag_bge_rerank
 ```
 
-Apple Silicon 会自动选 MPS，也可显式设为 `cpu` / `cuda`。默认 hash 向量零下载、可复现，适合 CI 与离线演示；BGE-M3 主报告为 4.65 / P95 188ms，hash 对照为 4.64，差异见 `reports/eval_rag.md`。
+Apple Silicon 会自动选 MPS，也可显式设为 `cpu` / `cuda`。默认 hash 向量零下载、可复现，适合 CI 与离线演示；BGE-M3 主报告为 4.65 / P95 188ms，hash 对照为 4.64。真实 reranker 只把幻觉分从 4.50 提到 4.53（总均分 -0.01），P95 从 188ms 升到 2.78s，因此默认仍用可解释启发式；对照见 `reports/bge_rerank_comparison.md`。切换 embedding/rerank 后 `Retriever` 会按 manifest 的维度与后端自动重建索引。
 
 ## 切换真实 Qwen / vLLM
 

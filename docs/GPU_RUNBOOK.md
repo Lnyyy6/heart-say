@@ -33,6 +33,17 @@ LLM_BACKEND=transformers TRANSFORMERS_ADAPTER_PATH=outputs/dpo-qwen1.5b \
 
 注意：这是 `transformers` + MPS 的本地串行推理，不是 vLLM 性能；P95 受共享机器负载影响，只作相对参考。产物在 `outputs/`（gitignore），报告在 `reports/eval_*_mps.md`。
 
+可选真实 rerank 对照（CrossEncoder，MPS）：
+
+```bash
+EMBEDDING_BACKEND=bge-m3 EMBEDDING_MODEL=outputs/bge-m3 EMBEDDING_DEVICE=mps \
+QDRANT_COLLECTION=heart_say_bge RERANKER_BACKEND=bge \
+RERANKER_MODEL=outputs/bge-reranker-v2-m3 RERANKER_DEVICE=mps \
+PYTHONPATH=src .venv/bin/python -m heart_say.evaluation.runner --name rag_bge_rerank --concurrency 1
+```
+
+实测 4.64（幻觉 4.53，+0.03）、P95 2.78s；启发式为 4.65 / 188ms，因此默认不启用 CrossEncoder。
+
 扩充数据 v1（1110 条 SFT / 555 偏好对）的配置是 `training/configs/sft_qwen1.5b_aug.yaml` 与 `dpo_qwen1.5b_aug.yaml`。在 16GB M1 Pro 上先停掉 Docker 释放内存，训练到 `save_steps=50` 检查点后提前停止并提升为最终 adapter；1110 条只覆盖约 9% 一个 epoch，**不是完整训练**。此前 40-step 尝试因其他进程占用内存卡死，本次同样受 swap 压力影响，完整 1 epoch 请在空闲 GPU/大内存机器重跑：
 
 ```bash

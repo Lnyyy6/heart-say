@@ -81,6 +81,20 @@
 - 产物：[sft_aug_mps](../reports/eval_sft_aug_mps.md)、[dpo_aug_mps](../reports/eval_dpo_aug_mps.md)、[扩充 SFT 对比](../reports/sft_aug_comparison.md)、[扩充 DPO 对比](../reports/dpo_aug_comparison.md)、[SFT 红队](../reports/redteam_sft_aug_mps.md)、[DPO 红队](../reports/redteam_dpo_aug_mps.md)。
 - 训练原始证据：[SFT summary](../reports/training/sft_qwen1.5b_aug.json) / [metrics](../reports/training/sft_qwen1.5b_aug_metrics.jsonl)、[DPO summary](../reports/training/dpo_qwen1.5b_aug.json) / [metrics](../reports/training/dpo_qwen1.5b_aug_metrics.jsonl)。
 
+### 1.3 真实 CrossEncoder Rerank 对照
+
+把可选 reranker 从启发式切到 `BAAI/bge-reranker-v2-m3`（CrossEncoder，MPS，批量打分），在同一 560 片段索引与 100 条用例上重跑：
+
+| 指标 | BGE-M3 + 启发式 | BGE-M3 + 真实 Rerank | 变化 |
+| --- | ---: | ---: | ---: |
+| 总均分 | **4.65** | 4.64 | -0.01 |
+| 幻觉 / 事实 | 4.50 | **4.53** | +0.03 |
+| 通过率 | 100% | 100% | 0 |
+| 引用覆盖率 | 61% | 61% | 0 |
+| P95 延迟 | **188 ms** | 2784.8 ms | +2596.8 ms |
+
+结论：真实 CrossEncoder 在这个 560 派生片段库上只带来 0.03 的幻觉分提升，却付出约 15 倍 P95 延迟；因此默认保留可解释启发式，reranker 仅作为可选配置。若知识库换成更多真实来源、候选噪声更大，需要重新评估这个取舍。产物：[rag_bge_rerank](../reports/eval_rag_bge_rerank.md)、[对照](../reports/bge_rerank_comparison.md)。
+
 ## 2. 评测集怎么构成
 
 - 100 条中文多轮/单轮用例，覆盖家长与 12-18 岁青少年两种视角。

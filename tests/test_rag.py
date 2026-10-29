@@ -1,7 +1,7 @@
 import numpy as np
 
 from heart_say.rag.embedder import HashEmbedder
-from heart_say.rag.retriever import get_retriever
+from heart_say.rag.retriever import HeuristicReranker, get_retriever
 from heart_say.rag.text import chunk_record, tokenize
 
 
@@ -39,6 +39,17 @@ def test_retrieval_prefers_relevant_topic():
     assert docs
     assert any(doc.topic in ("sleep", "study") for doc in docs[:3])
     assert all(doc.topic != "crisis" for doc in docs)
+
+
+def test_heuristic_reranker_batch_scores_in_order():
+    reranker = HeuristicReranker()
+    docs = [
+        {"title": "孩子不想上学", "text": "先问清楚最不想面对的是哪一部分，再一起定一个小步骤。", "audience": "parent"},
+        {"title": "手机使用约定", "text": "和孩子约定使用时段，冲突时先降级对话。", "audience": "parent"},
+    ]
+    scores = reranker.score_many("孩子最近不想上学，我该怎么开口？", docs, [0.5, 0.5], "parent")
+    assert len(scores) == 2
+    assert scores[0] > scores[1]
 
 
 def test_retrieval_filters_parent_docs_for_teen():

@@ -119,7 +119,10 @@ class Retriever:
             manifest.get("chunks") != len(self.chunks)
             or manifest.get("dim") != self.embedder.dim
             or manifest.get("embedding_backend") != self.settings.embedding_backend
-            or manifest.get("collection") != self.store.collection
+            or (
+                getattr(self.store, "collection", None)
+                and manifest.get("collection") != self.store.collection
+            )
         )
         if manifest and not stale and count >= len(self.chunks):
             return

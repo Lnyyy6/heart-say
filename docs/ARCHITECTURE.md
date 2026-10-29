@@ -106,7 +106,7 @@ stateDiagram-v2
 
 ```mermaid
 flowchart LR
-    KB[80 篇知识卡] --> CH[按句切块 360 字]
+    KB[80 张来源卡 / 560 片段] --> CH[按句切块 360 字]
     CH --> EMB[Hash / BGE-M3]
     CH --> BM[BM25<br/>jieba + char bigram]
     EMB --> QD[(Qdrant)]

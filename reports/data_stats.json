@@ -1,8 +1,8 @@
 {
-  "generated_on": "2026-10-29",
+  "generated_on": "2026-10-30",
   "knowledge": {
     "documents": 80,
-    "chunks": 80,
+    "chunks": 560,
     "avg_chars": 191.3,
     "topics": {
       "emotion_regulation": 14,
@@ -25,34 +25,37 @@
     }
   },
   "sft": {
-    "count": 60,
+    "count": 1110,
+    "seed_count": 60,
     "audience": {
-      "parent": 35,
-      "teen": 25
+      "parent": 560,
+      "teen": 550
     },
     "risk": {
-      "none": 8,
+      "none": 964,
       "low": 41,
-      "medium": 3,
-      "high": 4,
+      "medium": 57,
+      "high": 44,
       "critical": 4
     },
-    "avg_assistant_chars": 103.0,
+    "avg_assistant_chars": 125.0,
     "turns": {
-      "2": 60
+      "2": 1110
     }
   },
   "preference": {
-    "count": 30,
+    "count": 555,
+    "seed_count": 30,
     "reject_reasons": {
-      "说教": 4,
-      "缺乏共情": 4,
-      "空泛": 4,
+      "说教": 109,
+      "缺乏共情": 109,
+      "空泛": 109,
       "过长": 3,
       "诊断": 4,
-      "越界承诺": 4,
+      "越界承诺": 109,
       "危机处理不当": 4,
-      "贴标签": 3
+      "贴标签": 3,
+      "诊断越界": 105
     }
   },
   "eval": {

@@ -1,0 +1,34 @@
+# 1.5B + 1110 条本地扩充数据（60 人工种子 + 1050 模板增强）
+model_name_or_path: Qwen/Qwen2.5-1.5B-Instruct
+dataset_paths:
+  - data/sft/train.jsonl
+output_dir: outputs/sft-qwen1.5b-aug
+seed: 42
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+training:
+  num_train_epochs: 1
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 2
+  learning_rate: 2.0e-4
+  max_seq_length: 512
+  logging_steps: 10
+  save_steps: 100
+  save_total_limit: 2
+  warmup_ratio: 0.03
+  lr_scheduler_type: cosine
+  bf16: false
+  gradient_checkpointing: true
+  optim: adamw_torch

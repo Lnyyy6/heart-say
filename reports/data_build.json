@@ -1,10 +1,10 @@
 {
   "sft": {
-    "kept": 60,
+    "kept": 1110,
     "dropped": {}
   },
   "preference": {
-    "kept": 30,
+    "kept": 555,
     "dropped": {}
   },
   "outputs": [

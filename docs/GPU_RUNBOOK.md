@@ -31,6 +31,13 @@ LLM_BACKEND=transformers TRANSFORMERS_ADAPTER_PATH=outputs/dpo-qwen1.5b \
 
 注意：这是 `transformers` + MPS 的本地串行推理，不是 vLLM 性能；P95 受共享机器负载影响，只作相对参考。产物在 `outputs/`（gitignore），报告在 `reports/eval_*_mps.md`。
 
+扩充数据 v1（1110 条 SFT / 555 偏好对）的配置是 `training/configs/sft_qwen1.5b_aug.yaml`。本机尝试 40 step 时因其他进程占用内存导致训练进程卡死，未产出 adapter；请在空闲机器上重跑：
+
+```bash
+python training/sft_qlora.py --config training/configs/sft_qwen1.5b_aug.yaml \
+  --device mps --no-4bit --max-steps 150 --max-seq-length 512
+```
+
 ## 0.2 环境（CUDA）
 
 ```bash
@@ -56,9 +63,9 @@ python scripts/data_report.py --check
 python scripts/build_training_data.py
 ```
 
-当前 v0：60 条 SFT / 30 条偏好对 / 80 篇知识卡 / 100 条评测 / 50 条红队。
+当前 v1：1110 条 SFT（60 种子 + 1050 本地增强）/ 555 条偏好对（30 种子 + 525 增强）/ 80 张知识卡派生 560 片段 / 100 条评测 / 50 条红队。
 
-目标规模仍差：SFT 1k–2k、偏好 500–1k、知识片段 500–1000。补齐方式：
+SFT 与偏好对数量已进入目标区间，但增强句式为模板生成，质量仍低于强模型合成；560 个知识片段也主要是派生内容，需继续补充真实来源。补齐方式：
 
 ```bash
 # 用强模型扩充（需要 OpenAI 兼容 API Key）

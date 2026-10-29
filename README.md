@@ -24,9 +24,9 @@
 | --- | ---: | ---: |
 | 总均分 | 4.52 / 5 | **4.64 / 5** |
 | 通过率 | 99.0% | **100%** |
-| 事实 / 引用 | 3.83 | **4.40** |
+| 事实 / 引用 | 3.83 | **4.49** |
 | 引用覆盖率 | 0% | **61%** |
-| P95 | 19.0 ms | 223.6 ms |
+| P95 | 19.0 ms | 196.2 ms |
 
 **真实 1.5B SFT/DPO（MPS，100 条同一评测集）**：
 
@@ -68,7 +68,7 @@ python3 -m venv .venv
 .venv/bin/pip install -e .
 cp .env.example .env
 
-make index          # 构建知识库索引（80 篇 / 80 片段）
+make index          # 构建知识库索引（80 张来源卡 / 560 片段）
 PYTHONPATH=src .venv/bin/uvicorn app.api.main:app --port 8010
 ```
 
@@ -166,9 +166,9 @@ heart-say/
 │   ├── llm/                     # vLLM/OpenAI 兼容 + 离线共情编排器
 │   └── evaluation/              # 规则/LLM judge、runner、对比、报告
 ├── data/
-│   ├── knowledge/kb.jsonl       # 80 篇公开资料改写知识卡
-│   ├── sft/                     # 60 条种子对话 + 清洗产物
-│   ├── preference/              # 30 条偏好对
+│   ├── knowledge/kb.jsonl       # 80 张来源卡 + 480 派生片段
+│   ├── sft/                     # 60 条种子 + 1050 条本地增强，共 1110 条
+│   ├── preference/              # 30 条种子 + 525 条增强，共 555 条
 │   ├── eval/cases.jsonl         # 100 条评测用例
 │   └── redteam/prompts.jsonl    # 50 条红队 prompt
 ├── training/                    # QLoRA SFT、DPO、merge、AWQ、配置
@@ -268,7 +268,7 @@ make perf        # 压测本地 API（也可 --mode openai 压 vLLM）
 
 | 阶段 | 状态 | 说明 |
 | --- | --- | --- |
-| 第 1 周：baseline、数据、RAG 骨架 | 完成 | 80 篇知识卡、RAG demo、baseline 报告 |
+| 第 1 周：baseline、数据、RAG 骨架 | 完成 | 80 张知识卡 / 560 片段、1110 条 SFT、555 偏好对、RAG demo、baseline 报告 |
 | 第 2 周：SFT、评测集、Agent MVP | 完成（1.5B 真实训练） | 60 条种子、100 条评测、LangGraph Agent；1.5B SFT 在 MPS 上跑通（4.33/96%）；7B 待 GPU |
 | 第 3 周：DPO、量化、安全 | 部分完成 | 1.5B DPO 在 MPS 上跑通（4.31/98%）、50 条红队 100%；AWQ/vLLM 待 GPU |
 | 第 4 周：部署、Demo、材料 | 完成（本地 Docker 栈已验证） | FastAPI + Next.js + Compose(web/api/Qdrant/Redis/Nginx) 已在 8080 跑通；2:55 Demo 视频已录制；云 GPU 未部署 |
@@ -282,8 +282,8 @@ make perf        # 压测本地 API（也可 --mode openai 压 vLLM）
 
 ## 已知局限
 
-- 知识库 80 篇 / 80 片段，低于原计划 500-1000 片段，需要继续扩充与质量评估。
-- 真实训练只在 1.5B、60 条 SFT / 30 对偏好上完成 1 epoch；7B、AWQ、vLLM 未运行，不能把 1.5B 结果外推到 7B。
+- 知识库 80 张来源卡派生 560 片段，达到 500-1000 的数量目标，但派生片段与原文重叠，检索冗余与 P95 上升仍需评估；真实新来源仍只有 80 篇。
+- 真实训练只在 1.5B、60 条种子 SFT / 30 对偏好上完成 1 epoch；1110 条扩充数据的训练尝试因机器内存被其他进程占用而卡死，未产出 adapter；7B、AWQ、vLLM 未运行，不能把 1.5B 结果外推到 7B。
 - 评测 100 条、红队 50 条，规模有限；没有真实用户数据与临床验证。
 - 规则 judge 与人工评分相关性尚未量化；LLM judge 需单独配置。
 - 热点、热线与服务时间可能变化；上线前需核验 12356、120/110 与地区资源。

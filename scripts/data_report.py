@@ -47,10 +47,13 @@ def main() -> None:
 
     errors: list[str] = []
 
-    kb = load_records()
+    source_path = ROOT / "data/knowledge/kb_v0.jsonl"
+    kb = load_records(source_path if source_path.exists() else None)
     chunks = load_chunks()
-    sft = load_jsonl(ROOT / "data/sft/seed_sft.jsonl")
-    pairs = load_jsonl(ROOT / "data/preference/seed_pairs.jsonl")
+    seed_sft = load_jsonl(ROOT / "data/sft/seed_sft.jsonl")
+    seed_pairs = load_jsonl(ROOT / "data/preference/seed_pairs.jsonl")
+    sft = load_jsonl(ROOT / "data/sft/train.jsonl")
+    pairs = load_jsonl(ROOT / "data/preference/train_pairs.jsonl")
     eval_rows = load_jsonl(ROOT / "data/eval/cases.jsonl")
     redteam = load_jsonl(ROOT / "data/redteam/prompts.jsonl")
 
@@ -111,6 +114,7 @@ def main() -> None:
         },
         "sft": {
             "count": len(sft),
+            "seed_count": len(seed_sft),
             "audience": dict(sft_audience),
             "risk": dict(sft_risk),
             "avg_assistant_chars": avg_len(assistant_lengths),
@@ -118,6 +122,7 @@ def main() -> None:
         },
         "preference": {
             "count": len(pairs),
+            "seed_count": len(seed_pairs),
             "reject_reasons": dict(reject_reasons),
         },
         "eval": {
@@ -142,24 +147,24 @@ def main() -> None:
 
     data_card = f"""# 心语数据卡（Data Card）
 
-版本：v0 · {date.today().isoformat()}
+版本：v1 · {date.today().isoformat()}
 适用范围：心理教育与亲子沟通对话助手的研究/作品集演示，不用于临床或真实患者数据。
 
 ## 1. 数据概览
 
 | 数据 | 数量 | 说明 |
 | --- | ---: | --- |
-| 知识库文档 | {len(kb)} | 公开心理教育材料改写，覆盖 9 个主题 |
-| 检索片段 | {len(chunks)} | 按句切块，最大 360 字，保留来源元数据 |
-| SFT 对话 | {len(sft)} | 家长 {sft_audience.get('parent', 0)} / 青少年 {sft_audience.get('teen', 0)} |
-| 偏好对 | {len(pairs)} | chosen / rejected，单一缺陷标注 |
+| 知识库来源卡片 | {len(kb)} | 公开心理教育材料改写，覆盖 9 个主题 |
+| 检索片段 | {len(chunks)} | 来源卡 + 要点/问答/信号派生片段 |
+| SFT 对话 | {len(sft)} | {len(seed_sft)} 条种子 + {len(sft) - len(seed_sft)} 条模板增强；家长 {sft_audience.get('parent', 0)} / 青少年 {sft_audience.get('teen', 0)} |
+| 偏好对 | {len(pairs)} | {len(seed_pairs)} 条种子 + {len(pairs) - len(seed_pairs)} 条增强；单一缺陷标注 |
 | 评测用例 | {len(cases)} | 7 类能力，含危机与记忆 |
 | 红队 prompt | {len(redteam)} | 危机、用药、诊断、注入、隐私等 |
 | 检测到的 PII | {pii_total} | 手机号/身份证/邮箱正则扫描 |
 
 ## 2. 知识库
 
-- 文档平均长度：{avg_len(kb_lengths)} 字；片段数 {len(chunks)}。
+- 来源卡片平均长度：{avg_len(kb_lengths)} 字；检索片段 {len(chunks)}（原始卡片保留，派生片段不新增事实）。
 - 主题分布：
 
 | 主题 | 文档数 |
@@ -176,16 +181,17 @@ def main() -> None:
 
 ## 3. SFT 对话
 
-- 条数：{len(sft)}；平均 assistant 回复 {avg_len(assistant_lengths)} 字。
+- 条数：{len(sft)}（{len(seed_sft)} 条人工种子 + {len(sft) - len(seed_sft)} 条本地模板增强）；平均 assistant 回复 {avg_len(assistant_lengths)} 字。
 - 受众：家长 {sft_audience.get('parent', 0)}、青少年 {sft_audience.get('teen', 0)}。
 - 风险分布：{json.dumps(dict(sft_risk), ensure_ascii=False)}。
 - 轮数分布：{json.dumps(dict(Counter(len(r.get('messages', [])) // 2 for r in sft)), ensure_ascii=False)}。
 - 覆盖场景：考试焦虑、手机冲突、校园排挤、亲子冷战、离婚家庭、二胎、睡眠、身材焦虑、厌学、自伤危机、诊断/用药越界等。
-- 构造方式：种子先行，决定风格与安全边界；`scripts/synthesize_data.py` 提供强模型扩充模板与 schema。当前 v0 尚未运行强模型扩充，60 条均为人工种子；清洗脚本统一做 PII 脱敏、角色校验、去重与安全过滤。
+- 构造方式：种子先行，决定风格与安全边界；`scripts/augment_local_data.py` 用 21 个场景生成模板增强，assistant 回复来自离线编排器与固定安全话术，**不是强模型合成**；`scripts/synthesize_data.py` 保留强模型扩充管线。清洗脚本统一做 PII 脱敏、角色校验、去重与安全过滤。
+- 使用记录：原始 60 条种子跑过 1 epoch SFT（4.33/96%）；1110 条扩充数据的 40-step 训练尝试因机器内存被其他进程占用而卡死，未产出 adapter，需在空闲机器重跑。
 
 ## 4. 偏好对
 
-- 条数：{len(pairs)}；每条 chosen 具备共情、具体建议与边界，rejected 恰好包含一个典型缺陷。
+- 条数：{len(pairs)}（{len(seed_pairs)} 条人工种子 + {len(pairs) - len(seed_pairs)} 条本地增强）；每条 chosen 具备共情、具体建议与边界，rejected 恰好包含一个典型缺陷。
 - 拒绝原因分布：
 
 | 原因 | 数量 |
@@ -193,6 +199,7 @@ def main() -> None:
 {reject_rows}
 
 - 用途：DPO 对齐；危机/边界对用于降低越界承诺与不当处置。
+- 使用记录：30 对种子上做过 1.5B DPO（4.31/98%）；555 条增强对用于后续 DPO 实验，rejected 不含可操作伤害方法。
 
 ## 5. 评测与红队
 
@@ -210,8 +217,8 @@ def main() -> None:
 
 ## 7. 已知局限
 
-- v0 知识库规模为 {len(kb)} 篇 / {len(chunks)} 片段，低于原计划 500-1000 片段，需继续扩充并做去重/质量评估。
-- 合成对话可能带有强模型的表达偏好；已人工抽检一部分，但未做双人标注与一致性统计。
+- 知识库为 {len(kb)} 张来源卡派生 {len(chunks)} 片段，数量达标但派生片段与原文重叠，需继续去重与质量评估；真实新来源仍只有 {len(kb)} 篇。
+- 1050 条扩充对话是模板 + 离线编排器生成，句式和场景重复度高于强模型合成；已人工抽看，但未做双人标注与一致性统计。
 - 评测集 100 条，覆盖仍有限；危机场景为文本模拟，不能替代真实临床评估。
 - 规则 judge 对“共情质量”的测量是代理指标，需与人工评分做相关性校准。
 - 热线与转介资源可能变化，部署前需复核。
@@ -224,8 +231,8 @@ python scripts/build_training_data.py  # 清洗并生成 train.jsonl
 python -m heart_say.evaluation.runner --name rag
 ```
 
-数据文件：`data/knowledge/kb.jsonl`、`data/sft/seed_sft.jsonl`、`data/preference/seed_pairs.jsonl`、
-`data/eval/cases.jsonl`、`data/redteam/prompts.jsonl`。
+数据文件：`data/knowledge/kb.jsonl`、`data/knowledge/kb_v0.jsonl`、`data/sft/train.jsonl`、
+`data/preference/train_pairs.jsonl`、`data/eval/cases.jsonl`、`data/redteam/prompts.jsonl`。
 """
     (ROOT / "docs" / "DATA_CARD.md").write_text(data_card, encoding="utf-8")
 

@@ -14,8 +14,8 @@ def read_jsonl(path: Path) -> list[dict]:
 def test_knowledge_base_schema_and_count():
     records = load_records()
     chunks = load_chunks()
-    assert len(records) == 80
-    assert chunks
+    assert 500 <= len(records) <= 1000
+    assert len(chunks) >= len(records)
     assert all(record["id"] and record["text"] for record in records)
     assert all(record["source_name"] for record in records)
 
@@ -23,8 +23,12 @@ def test_knowledge_base_schema_and_count():
 def test_sft_and_preference_counts():
     sft = read_jsonl(ROOT / "data/sft/seed_sft.jsonl")
     pairs = read_jsonl(ROOT / "data/preference/seed_pairs.jsonl")
+    train_sft = read_jsonl(ROOT / "data/sft/train.jsonl")
+    train_pairs = read_jsonl(ROOT / "data/preference/train_pairs.jsonl")
     assert len(sft) == 60
     assert len(pairs) == 30
+    assert 1000 <= len(train_sft) <= 2000
+    assert 500 <= len(train_pairs) <= 1000
     for record in sft:
         roles = [message["role"] for message in record["messages"]]
         assert roles[0] == "user"

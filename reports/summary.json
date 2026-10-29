@@ -1,20 +1,20 @@
 {
-  "updated_at": "2026-10-29T16:57:52.449796+00:00",
+  "updated_at": "2026-10-29T17:32:37.745722+00:00",
   "latest": {
     "name": "rag",
     "file": "eval_rag.json",
-    "generated_at": "2026-10-29T16:57:52.449796+00:00",
+    "generated_at": "2026-10-29T17:32:37.745722+00:00",
     "cases": 100,
     "use_rag": true,
     "model": "offline-composer-v1",
-    "overall": 4.64,
+    "overall": 4.65,
     "pass_rate": 1.0,
     "dimensions": {
       "empathy": 3.96,
-      "boundary": 4.98,
-      "safety": 4.69,
-      "hallucination": 4.49,
-      "persona": 4.73,
+      "boundary": 5.0,
+      "safety": 4.71,
+      "hallucination": 4.5,
+      "persona": 4.74,
       "preachiness": 5.0
     },
     "categories": [
@@ -37,15 +37,15 @@
         "category": "empathy",
         "label": "共情",
         "cases": 20,
-        "overall": 4.58,
+        "overall": 4.61,
         "pass_rate": 1.0,
         "dimensions": {
           "empathy": 4.05,
-          "boundary": 4.9,
-          "safety": 4.9,
-          "hallucination": 4.78,
-          "persona": 4.72,
-          "preachiness": 4.97
+          "boundary": 5.0,
+          "safety": 5.0,
+          "hallucination": 4.83,
+          "persona": 4.75,
+          "preachiness": 5.0
         }
       },
       {
@@ -55,11 +55,11 @@
         "overall": 4.56,
         "pass_rate": 1.0,
         "dimensions": {
-          "empathy": 3.27,
+          "empathy": 3.09,
           "boundary": 5.0,
           "safety": 4.25,
-          "hallucination": 4.64,
-          "persona": 4.66,
+          "hallucination": 4.68,
+          "persona": 4.71,
           "preachiness": 5.0
         }
       },
@@ -67,13 +67,13 @@
         "category": "memory",
         "label": "记忆",
         "cases": 10,
-        "overall": 4.7,
+        "overall": 4.69,
         "pass_rate": 1.0,
         "dimensions": {
           "empathy": 4.35,
           "boundary": 5.0,
           "safety": 4.5,
-          "hallucination": 4.7,
+          "hallucination": 4.65,
           "persona": 4.8,
           "preachiness": 5.0
         }
@@ -88,7 +88,7 @@
           "empathy": 3.59,
           "boundary": 5.0,
           "safety": 4.45,
-          "hallucination": 4.73,
+          "hallucination": 4.77,
           "persona": 4.75,
           "preachiness": 5.0
         }
@@ -103,8 +103,8 @@
           "empathy": 4.39,
           "boundary": 5.0,
           "safety": 5.0,
-          "hallucination": 4.89,
-          "persona": 4.63,
+          "hallucination": 4.78,
+          "persona": 4.69,
           "preachiness": 5.0
         }
       },
@@ -112,10 +112,10 @@
         "category": "safety",
         "label": "安全",
         "cases": 23,
-        "overall": 4.63,
+        "overall": 4.64,
         "pass_rate": 1.0,
         "dimensions": {
-          "empathy": 4.07,
+          "empathy": 4.17,
           "boundary": 5.0,
           "safety": 4.64,
           "hallucination": 4.15,
@@ -132,8 +132,8 @@
     },
     "citation_rate": 0.61,
     "latency_ms": {
-      "p50": 86.7,
-      "p95": 196.2
+      "p50": 54.0,
+      "p95": 188.0
     },
     "failures": []
   },
@@ -891,18 +891,18 @@
     {
       "name": "rag",
       "file": "eval_rag.json",
-      "generated_at": "2026-10-29T16:57:52.449796+00:00",
+      "generated_at": "2026-10-29T17:32:37.745722+00:00",
       "cases": 100,
       "use_rag": true,
       "model": "offline-composer-v1",
-      "overall": 4.64,
+      "overall": 4.65,
       "pass_rate": 1.0,
       "dimensions": {
         "empathy": 3.96,
-        "boundary": 4.98,
-        "safety": 4.69,
-        "hallucination": 4.49,
-        "persona": 4.73,
+        "boundary": 5.0,
+        "safety": 4.71,
+        "hallucination": 4.5,
+        "persona": 4.74,
         "preachiness": 5.0
       },
       "categories": [
@@ -925,15 +925,15 @@
           "category": "empathy",
           "label": "共情",
           "cases": 20,
-          "overall": 4.58,
+          "overall": 4.61,
           "pass_rate": 1.0,
           "dimensions": {
             "empathy": 4.05,
-            "boundary": 4.9,
-            "safety": 4.9,
-            "hallucination": 4.78,
-            "persona": 4.72,
-            "preachiness": 4.97
+            "boundary": 5.0,
+            "safety": 5.0,
+            "hallucination": 4.83,
+            "persona": 4.75,
+            "preachiness": 5.0
           }
         },
         {
@@ -943,11 +943,11 @@
           "overall": 4.56,
           "pass_rate": 1.0,
           "dimensions": {
-            "empathy": 3.27,
+            "empathy": 3.09,
             "boundary": 5.0,
             "safety": 4.25,
-            "hallucination": 4.64,
-            "persona": 4.66,
+            "hallucination": 4.68,
+            "persona": 4.71,
             "preachiness": 5.0
           }
         },
@@ -955,13 +955,13 @@
           "category": "memory",
           "label": "记忆",
           "cases": 10,
-          "overall": 4.7,
+          "overall": 4.69,
           "pass_rate": 1.0,
           "dimensions": {
             "empathy": 4.35,
             "boundary": 5.0,
             "safety": 4.5,
-            "hallucination": 4.7,
+            "hallucination": 4.65,
             "persona": 4.8,
             "preachiness": 5.0
           }
@@ -976,7 +976,7 @@
             "empathy": 3.59,
             "boundary": 5.0,
             "safety": 4.45,
-            "hallucination": 4.73,
+            "hallucination": 4.77,
             "persona": 4.75,
             "preachiness": 5.0
           }
@@ -991,8 +991,8 @@
             "empathy": 4.39,
             "boundary": 5.0,
             "safety": 5.0,
-            "hallucination": 4.89,
-            "persona": 4.63,
+            "hallucination": 4.78,
+            "persona": 4.69,
             "preachiness": 5.0
           }
         },
@@ -1000,10 +1000,10 @@
           "category": "safety",
           "label": "安全",
           "cases": 23,
-          "overall": 4.63,
+          "overall": 4.64,
           "pass_rate": 1.0,
           "dimensions": {
-            "empathy": 4.07,
+            "empathy": 4.17,
             "boundary": 5.0,
             "safety": 4.64,
             "hallucination": 4.15,
@@ -1020,8 +1020,8 @@
       },
       "citation_rate": 0.61,
       "latency_ms": {
-        "p50": 86.7,
-        "p95": 196.2
+        "p50": 54.0,
+        "p95": 188.0
       },
       "failures": []
     }

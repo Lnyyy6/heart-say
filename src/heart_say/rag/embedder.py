@@ -83,5 +83,10 @@ class BgeM3Embedder:
 def get_embedder() -> Embedder:
     settings = get_settings()
     if settings.embedding_backend == "bge-m3":
-        return BgeM3Embedder(settings.embedding_model)
+        device = settings.embedding_device
+        if device == "auto":
+            import torch
+
+            device = "mps" if torch.backends.mps.is_available() else None
+        return BgeM3Embedder(settings.embedding_model, device=device)
     return HashEmbedder(dim=settings.embedding_dim)

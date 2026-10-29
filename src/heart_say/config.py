@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     # RAG
     embedding_backend: Literal["hash", "bge-m3"] = "hash"
     embedding_model: str = "BAAI/bge-m3"
+    embedding_device: str = "auto"
     embedding_dim: int = 512
     reranker_backend: Literal["heuristic", "bge"] = "heuristic"
     reranker_model: str = "BAAI/bge-reranker-v2-m3"

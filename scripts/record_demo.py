@@ -229,7 +229,7 @@ def main() -> None:
         show(
             "07 / EVIDENCE",
             "RAG 让事实更稳。",
-            "事实/引用维度 +0.68，通过率 98.0% → 100%；代价是 P95 增加约 108ms。",
+            "事实/引用维度 +0.67，通过率 99.0% → 100%；代价是 P95 增加约 169ms。",
         )
         page.locator(".eval-scroll").evaluate("(el) => el.scrollTop = 560")
         page.wait_for_timeout(16000)

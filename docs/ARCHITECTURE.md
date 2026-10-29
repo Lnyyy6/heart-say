@@ -73,16 +73,19 @@ stateDiagram-v2
     [*] --> Triage
     Triage --> CrisisProtocol: risk=high/critical
     Triage --> Tools: normal
-    Tools --> Retrieve: resource/referral notes
+    Tools --> Boundary: resource/referral notes
+    Boundary --> BoundaryProtocol: 诊断/用药/隐私/注入等
+    Boundary --> Retrieve: 普通情绪/亲子问题
     Retrieve --> Compose: top-k docs
     Compose --> Generate
     Generate --> Guard
     CrisisProtocol --> Guard
+    BoundaryProtocol --> Guard
     Guard --> Persist
     Persist --> [*]
 ```
 
-`LangGraph` 负责确定性决策（triage → route → tools → retrieve → compose）；工具层只做可解释查询（求助资源、专业转介路径），不参与危机处置。生成与流式输出在 Agent 外层执行，因为 API 需要逐 token 返回。两者共享同一个 `AgentPlan`，评测与非流式接口走同一安全策略。
+`LangGraph` 负责确定性决策（triage → route → tools → boundary → retrieve → compose）；工具层只做可解释查询，边界节点把诊断、用药、进食、隐私、注入等请求直接交给固定话术，真实模型不参与这些轮次。生成与流式输出在 Agent 外层执行，因为 API 需要逐 token 返回。两者共享同一个 `AgentPlan`，评测与非流式接口走同一安全策略。
 
 ### 状态字段
 
@@ -91,6 +94,7 @@ stateDiagram-v2
 - `audience / emotion / intent`
 - `risk`：level、categories、action、reason
 - `tool_notes / tool_calls`：资源查询、专业转介路径
+- `crisis_text / boundary_text`：固定安全或边界回复
 - `docs / messages`
 - `timings / graph`：可观测性
 

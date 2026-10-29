@@ -7,9 +7,9 @@
 ## 推荐 bullets（按投递方向选 3-4 条）
 
 - 从零搭建心理教育对话系统：Qwen2.5 + QLoRA（r=16/alpha=32）+ DPO 偏好对齐，接入 BGE-M3 + Qdrant 混合检索（BM25 + RRF + Rerank），回答展示可追溯引用；LangGraph 编排情绪识别、检索、危机路由与回复。
-- 在无 CUDA 的 M1 Pro 16GB 上用 Qwen2.5-1.5B 真跑 SFT/DPO（SFT 峰值 10.3GB / 23.6min，DPO 9.5GB / 1.1min），同一套 100 条评测从 base 3.90/74% 提升到 SFT 4.13/82%、DPO 4.16/88%。
+- 在无 CUDA 的 M1 Pro 16GB 上用 Qwen2.5-1.5B 真跑 SFT/DPO（SFT 峰值 10.3GB / 23.6min，DPO 9.5GB / 1.1min），同一套 100 条评测从 base 4.15/85% 提升到 SFT 4.33/96%、DPO 4.31/98%。
 - 设计四层安全机制（输入风险分级 → 危机固定协议 → 输出守门 → 红队回归）：危机场景不调用生成模型，覆盖自杀/自伤/虐待/霸凌/用药/诊断/隐私/注入；50 条红队通过率从 72% 提升到 100%，并记录残余风险。
-- 建立 100 条中文评测集与规则/LLM judge，覆盖共情、边界、安全、事实、人设、说教感；RAG 使事实/引用维度 +0.68、通过率 +2pp，P95 115ms；输出 baseline/RAG/红队报告与数据卡。
+- 建立 100 条中文评测集与规则/LLM judge，覆盖共情、边界、安全、事实、人设、说教感；RAG 使事实/引用维度 +0.57、通过率 +1pp，输出 baseline/RAG/红队报告与数据卡。
 - 用 FastAPI + Next.js 15 实现流式聊天（SSE）、引用展开、停止/重试、会话记忆、安全提示与评测看板；Docker Compose 编排 web/api/Qdrant/Redis/Nginx，可选 vLLM GPU profile。
 
 ## 技术关键词

@@ -26,8 +26,8 @@ LLM_BACKEND=transformers TRANSFORMERS_ADAPTER_PATH=outputs/dpo-qwen1.5b \
 
 | 阶段 | 数据 | 实际训练 | 耗时 | 峰值显存 | train loss | 评测均分 | 通过率 |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| SFT | 60 条 | 1 epoch / 30 step | 23.6 min | 10.31 GB | 2.315 | 4.13 | 82% |
-| DPO | 30 对 | 1 epoch / 15 step | 1.1 min | 9.47 GB | 0.015 | 4.16 | 88% |
+| SFT | 60 条 | 1 epoch / 30 step | 23.6 min | 10.31 GB | 2.315 | 4.33 | 96% |
+| DPO | 30 对 | 1 epoch / 15 step | 1.1 min | 9.47 GB | 0.015 | 4.31 | 98% |
 
 注意：这是 `transformers` + MPS 的本地串行推理，不是 vLLM 性能；P95 受共享机器负载影响，只作相对参考。产物在 `outputs/`（gitignore），报告在 `reports/eval_*_mps.md`。
 

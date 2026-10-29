@@ -556,6 +556,39 @@ class OfflineComposer(BaseGenerator):
                 await asyncio.sleep(ctx.stream_delay_ms / 1000)
 
 
+def boundary_reply(ctx: GenerationContext) -> str | None:
+    """返回结构性边界回复；命中时不再交给生成模型。
+
+    真实模型会遗忘系统提示词里的边界，尤其是诊断、用药、隐私和注入类请求。
+    这里复用离线编排器已经验证过的固定话术，把“拒绝 + 替代路径”放回代码路径。
+    """
+    query = ctx.user_message.strip()
+    if not query:
+        return None
+    previous_user = ""
+    for turn in reversed(ctx.history):
+        if turn.get("role") == "user":
+            previous_user = turn.get("content", "")
+            break
+    effective = query
+    if previous_user and (len(query) < 14 or _CONTEXTUAL.search(query)):
+        effective = f"{previous_user} {query}"
+
+    composer = OfflineComposer()
+    if "eating" in ctx.risk_categories:
+        return composer._eating_response(ctx)
+    if _CURE_GUARANTEE.search(effective) or _PRIVACY.search(effective):
+        return composer._privacy_response(ctx) if _PRIVACY.search(effective) else composer._off_scope_response(ctx)
+    if _OFF_SCOPE_SEXUAL.search(effective) or _OFF_SCOPE_CHEAT.search(effective) or _DISCRIMINATION.search(effective):
+        return composer._off_scope_response(ctx)
+    if _INJECTION.search(effective) or _MED_REQUEST.search(effective) or _BOUNDARY.search(effective):
+        return composer._boundary_response(ctx, effective)
+    special = composer._special_boundary_response(ctx, effective)
+    if special:
+        return special
+    return None
+
+
 class LocalHFGenerator(BaseGenerator):
     """用 Transformers 加载 Qwen + 可选 PEFT adapter，在 MPS/CPU 上做本地评测。
 

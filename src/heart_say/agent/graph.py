@@ -18,6 +18,7 @@ from typing import Any, AsyncIterator, TypedDict
 
 from ..config import get_settings
 from ..llm import GenerationContext, LLMError, build_generator
+from ..llm.client import boundary_reply
 from ..memory import SessionStore, get_session_store
 from ..rag import get_retriever
 from ..rag.retriever import to_citations
@@ -42,6 +43,7 @@ class AgentState(TypedDict, total=False):
     intent: str
     risk: dict[str, Any]
     crisis_text: str
+    boundary_text: str
     docs: list[dict[str, Any]]
     messages: list[dict[str, str]]
     tool_notes: list[str]
@@ -61,6 +63,7 @@ class AgentPlan:
     citations: list[Citation]
     trace: TraceInfo
     crisis_text: str = ""
+    boundary_text: str = ""
     guard_flags: list[str] = field(default_factory=list)
     streamed_text: str = ""
     prepared_at: float = field(default_factory=time.perf_counter)
@@ -91,6 +94,8 @@ class HeartSayAgent:
             builder.add_node("triage", self._triage_node)
             builder.add_node("safety_protocol", self._protocol_node)
             builder.add_node("tools", self._tools_node)
+            builder.add_node("boundary", self._boundary_node)
+            builder.add_node("boundary_protocol", self._boundary_protocol_node)
             builder.add_node("retrieve", self._retrieve_node)
             builder.add_node("compose", self._compose_node)
             builder.add_edge(START, "triage")
@@ -100,7 +105,13 @@ class HeartSayAgent:
                 {"protocol": "safety_protocol", "retrieve": "tools"},
             )
             builder.add_edge("safety_protocol", END)
-            builder.add_edge("tools", "retrieve")
+            builder.add_edge("tools", "boundary")
+            builder.add_conditional_edges(
+                "boundary",
+                self._route_after_boundary,
+                {"protocol": "boundary_protocol", "retrieve": "retrieve"},
+            )
+            builder.add_edge("boundary_protocol", END)
             builder.add_edge("retrieve", "compose")
             builder.add_edge("compose", END)
             return builder.compile()
@@ -187,6 +198,35 @@ class HeartSayAgent:
             "graph": state.get("graph", []) + ["tools"],
         }
 
+    async def _boundary_node(self, state: AgentState) -> dict[str, Any]:
+        started = time.perf_counter()
+        risk = RiskAssessment(**state.get("risk", {"level": "none"}))
+        ctx = GenerationContext(
+            user_message=state["user_message"],
+            audience=state.get("audience", "unknown"),
+            emotion=state.get("emotion", "unknown"),
+            emotion_intensity=state.get("emotion_intensity", 0.0),
+            risk_level=risk.level,
+            risk_categories=risk.categories,
+            facts=state.get("facts", []),
+            history=state.get("history", []),
+            use_rag=state.get("use_rag", True),
+        )
+        text = boundary_reply(ctx) or ""
+        timings = dict(state.get("timings", {}))
+        timings["boundary_ms"] = round((time.perf_counter() - started) * 1000, 2)
+        return {
+            "boundary_text": text,
+            "timings": timings,
+            "graph": state.get("graph", []) + ["boundary"],
+        }
+
+    def _route_after_boundary(self, state: AgentState) -> str:
+        return "protocol" if state.get("boundary_text") else "retrieve"
+
+    async def _boundary_protocol_node(self, state: AgentState) -> dict[str, Any]:
+        return {"graph": state.get("graph", []) + ["boundary_protocol"]}
+
     async def _retrieve_node(self, state: AgentState) -> dict[str, Any]:
         started = time.perf_counter()
         if not state.get("use_rag", True):
@@ -261,6 +301,10 @@ class HeartSayAgent:
             state.update(await self._protocol_node(state))
             return state
         state.update(await self._tools_node(state))
+        state.update(await self._boundary_node(state))
+        if self._route_after_boundary(state) == "protocol":
+            state.update(await self._boundary_protocol_node(state))
+            return state
         state.update(await self._retrieve_node(state))
         state.update(await self._compose_node(state))
         state["graph"] = state.get("graph", []) + ["sequential"]
@@ -299,7 +343,7 @@ class HeartSayAgent:
             facts=facts,
             history=history,
             use_rag=use_rag,
-            stream_delay_ms=0 if state.get("crisis_text") else stream_delay_ms,
+            stream_delay_ms=0 if (state.get("crisis_text") or state.get("boundary_text")) else stream_delay_ms,
             tool_notes=state.get("tool_notes", []),
         )
         messages = state.get("messages", [])
@@ -315,7 +359,11 @@ class HeartSayAgent:
             use_rag=use_rag,
             audience=state.get("audience", "unknown"),  # type: ignore[arg-type]
             emotion=state.get("emotion", "unknown"),
-            intent="crisis" if state.get("crisis_text") else state.get("intent", "support"),
+            intent="crisis"
+            if state.get("crisis_text")
+            else "boundary"
+            if state.get("boundary_text")
+            else state.get("intent", "support"),
             timings_ms=timings,
             retrieved=[
                 {
@@ -332,7 +380,11 @@ class HeartSayAgent:
         safety = SafetyInfo(
             level=risk.level,
             categories=risk.categories,
-            action="protocol" if state.get("crisis_text") else risk.action,
+            action="protocol"
+            if state.get("crisis_text")
+            else "boundary"
+            if state.get("boundary_text")
+            else risk.action,
             disclaimer=DISCLAIMER,
             resources=resources_for(risk.level),
             guard_flags=[],
@@ -347,20 +399,22 @@ class HeartSayAgent:
             citations=citations,
             trace=trace,
             crisis_text=state.get("crisis_text", ""),
+            boundary_text=state.get("boundary_text", ""),
             prepared_at=started,
         )
 
     async def stream(self, plan: AgentPlan) -> AsyncIterator[str]:
         """按句守门后流式输出，避免越界内容先到达用户。"""
-        if plan.crisis_text:
-            parts = re.findall(r"[^。！？!?；;]+[。！？!?；;]?", plan.crisis_text)
+        fixed = plan.crisis_text or plan.boundary_text
+        if fixed:
+            parts = re.findall(r"[^。！？!?；;]+[。！？!?；;]?", fixed)
             for part in parts:
                 if not part.strip():
                     continue
                 yield part
                 if plan.ctx.stream_delay_ms > 0:
                     await asyncio.sleep(plan.ctx.stream_delay_ms / 1000)
-            plan.streamed_text = plan.crisis_text
+            plan.streamed_text = fixed
             return
 
         buffer = ""
@@ -405,6 +459,8 @@ class HeartSayAgent:
         plan = await self.prepare(session_id, message, use_rag=use_rag, persist_memory=persist_memory)
         if plan.crisis_text:
             text = plan.crisis_text
+        elif plan.boundary_text:
+            text = plan.boundary_text
         else:
             started = time.perf_counter()
             raw = await self.generator.agenerate(plan.messages, plan.ctx)

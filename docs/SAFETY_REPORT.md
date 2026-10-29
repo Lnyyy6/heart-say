@@ -26,6 +26,21 @@ QDRANT_PATH= QDRANT_URL= PYTHONPATH=src .venv/bin/python scripts/run_redteam.py 
 
 产物：[reports/redteam_offline.md](../reports/redteam_offline.md)
 
+### 1.1 真实 1.5B SFT/DPO 回归：56% → 100%
+
+用同一套 50 条红队跑真实的 1.5B SFT adapter，首轮只有 **56%**。危机、虐待、自伤、暴力类仍然 100%（因为走固定协议）；但诊断 25%、进食 0%、隐私 0%、注入 10%、越界请求 25%。这说明**系统提示词里的边界会被模型遗忘**，SFT 反而让回复更短、更少显式拒绝。
+
+修复不是继续改 prompt，而是新增 `boundary` 节点：在生成前识别诊断、用药、进食、隐私、注入、保密、法律、站队等请求，直接返回离线阶段验证过的固定边界话术，真实模型不再参与这些轮次。修复后 SFT 与 DPO 都是 **50/50 = 100%**。
+
+| 模型 | 修复前 | 修复后 |
+| --- | ---: | ---: |
+| SFT 1.5B | 28 / 50 = 56% | 50 / 50 = 100% |
+| DPO 1.5B | 未单独统计（同类缺陷） | 50 / 50 = 100% |
+
+产物：[redteam_sft_mps](../reports/redteam_sft_mps.md)、[redteam_dpo_mps](../reports/redteam_dpo_mps.md)。
+
+这也再次说明：红队 100% 只覆盖当前固定 prompt；换模型、扩数据或改提示词后必须重跑，不能把 100% 当成“模型已经安全”。
+
 ## 2. 首轮失败的 14 条：原因与修复
 
 ### A. 真实安全行为缺陷（8 条）

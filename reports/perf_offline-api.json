@@ -1,0 +1,24 @@
+{
+  "label": "offline-api",
+  "generated_at": "2026-10-29T10:30:11.237008+00:00",
+  "mode": "app",
+  "url": "http://127.0.0.1:8010",
+  "model": "heart-say-api",
+  "requests": 24,
+  "concurrency": 4,
+  "success": 24,
+  "errors": 0,
+  "ttft_ms": {
+    "p50": 37.3,
+    "p95": 141.8
+  },
+  "latency_ms": {
+    "p50": 172.0,
+    "p95": 226.6
+  },
+  "throughput_tokens_per_sec": 1463.1,
+  "rps": 21.92,
+  "wall_sec": 1.09,
+  "avg_output_tokens": 66.8,
+  "gpu_memory": null
+}

@@ -1,0 +1,93 @@
+{
+  "generated_on": "2026-10-29",
+  "knowledge": {
+    "documents": 80,
+    "chunks": 80,
+    "avg_chars": 191.3,
+    "topics": {
+      "emotion_regulation": 14,
+      "parent_child": 14,
+      "adolescence": 10,
+      "study": 10,
+      "sleep": 6,
+      "social": 8,
+      "crisis": 8,
+      "boundaries": 6,
+      "development": 4
+    },
+    "sources": {
+      "世界卫生组织（WHO）青少年心理健康事实清单（科普改写）": 16,
+      "美国国家精神卫生研究所（NIMH）儿童青少年心理健康科普（改写）": 14,
+      "美国儿科学会（AAP）“心理健康一分钟”科普（改写）": 25,
+      "美国疾病控制与预防中心（CDC）心理健康科普（改写）": 12,
+      "中国教育部公开健康教育资料（科普改写）": 9,
+      "国家卫生健康委员会公开健康科普（改写）": 4
+    }
+  },
+  "sft": {
+    "count": 60,
+    "audience": {
+      "parent": 35,
+      "teen": 25
+    },
+    "risk": {
+      "none": 8,
+      "low": 41,
+      "medium": 3,
+      "high": 4,
+      "critical": 4
+    },
+    "avg_assistant_chars": 103.0,
+    "turns": {
+      "2": 60
+    }
+  },
+  "preference": {
+    "count": 30,
+    "reject_reasons": {
+      "说教": 4,
+      "缺乏共情": 4,
+      "空泛": 4,
+      "过长": 3,
+      "诊断": 4,
+      "越界承诺": 4,
+      "危机处理不当": 4,
+      "贴标签": 3
+    }
+  },
+  "eval": {
+    "count": 100,
+    "categories": {
+      "empathy": 20,
+      "boundary": 16,
+      "safety": 23,
+      "hallucination": 11,
+      "persona": 11,
+      "preachiness": 9,
+      "memory": 10
+    },
+    "risk": {
+      "low": 37,
+      "medium": 34,
+      "high": 20,
+      "critical": 9
+    }
+  },
+  "redteam": {
+    "count": 50,
+    "categories": {
+      "crisis": 8,
+      "self_harm": 5,
+      "medication": 5,
+      "diagnosis": 4,
+      "abuse": 4,
+      "violence": 4,
+      "eating": 3,
+      "prompt_injection": 10,
+      "privacy": 3,
+      "off_scope": 4
+    }
+  },
+  "pii_hits": 0,
+  "errors": []
+}

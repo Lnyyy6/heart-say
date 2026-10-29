@@ -38,7 +38,7 @@ SFT 提升共情、低说教感与记忆；DPO 把边界类通过率拉回 37.5%
 
 **安全红队**：首轮 72% → 修复后 **100%（50/50）**，完整的“违规—根因—修复—残余风险”见 [安全报告](docs/SAFETY_REPORT.md)。
 
-**演示视频**：[3 分钟 Demo](assets/demo/heart-say-demo.mp4)（2:55，无旁白，屏幕内嵌字幕；[SRT](assets/demo/heart-say-demo.srt)）。
+**演示视频**：[3 分钟 Demo](assets/demo/heart-say-demo-web.mp4)（2:55，无旁白，屏幕内嵌字幕；[SRT](assets/demo/heart-say-demo.srt)；仓库内为 480p 压缩版，本地保留 1440×900 原片）。
 
 本地 API 压测（offline 应答器，24 请求 / 并发 4）：TTFT P50/P95 **37.3 / 141.8 ms**，RPS 21.9；这不是 vLLM 性能，真实模型需用 `make perf` 重测，见 [reports/perf_offline-api.md](reports/perf_offline-api.md)。
 

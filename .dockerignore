@@ -1,0 +1,15 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+app/web/node_modules
+app/web/.next
+data/qdrant
+data/sessions
+data/index
+outputs
+reports
+assets
+.env
+.DS_Store

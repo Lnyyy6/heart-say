@@ -1,0 +1,14 @@
+{
+  "sft": {
+    "kept": 60,
+    "dropped": {}
+  },
+  "preference": {
+    "kept": 30,
+    "dropped": {}
+  },
+  "outputs": [
+    "data/sft/train.jsonl",
+    "data/preference/train_pairs.jsonl"
+  ]
+}

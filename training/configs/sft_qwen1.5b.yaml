@@ -1,0 +1,34 @@
+# 最低显存降级配置：1.5B QLoRA。用于先验证链路，不用于追求最终效果。
+model_name_or_path: Qwen/Qwen2.5-1.5B-Instruct
+dataset_paths:
+  - data/sft/train.jsonl
+output_dir: outputs/sft-qwen1.5b
+seed: 42
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+training:
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 2
+  learning_rate: 2.0e-4
+  max_seq_length: 2048
+  logging_steps: 10
+  save_steps: 100
+  save_total_limit: 2
+  warmup_ratio: 0.03
+  lr_scheduler_type: cosine
+  bf16: true
+  gradient_checkpointing: true
+  optim: paged_adamw_8bit

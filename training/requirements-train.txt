@@ -1,0 +1,14 @@
+# GPU 训练环境（Linux + CUDA 12.x，单卡 24GB 可跑 Qwen2.5-7B QLoRA）
+torch>=2.3,<2.7
+transformers==4.46.3
+peft==0.13.2
+trl==0.12.2
+datasets>=3.0
+accelerate>=1.0
+bitsandbytes>=0.44
+sentencepiece>=0.2
+pyyaml>=6.0
+
+# 量化/推理（可选，按需安装）
+# autoawq>=0.2.7
+# vllm>=0.6.3

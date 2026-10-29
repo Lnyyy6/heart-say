@@ -1,0 +1,21 @@
+# DPO 在 SFT adapter 之上继续训练；beta 是实验重点。
+base_model: Qwen/Qwen2.5-7B-Instruct
+sft_adapter: outputs/sft-qwen7b
+dataset_path: data/preference/train_pairs.jsonl
+output_dir: outputs/dpo-qwen7b
+seed: 42
+
+training:
+  beta: 0.1
+  num_train_epochs: 1
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 5.0e-5
+  max_length: 1536
+  max_prompt_length: 768
+  logging_steps: 10
+  save_steps: 100
+  save_total_limit: 2
+  warmup_ratio: 0.05
+  bf16: true
+  optim: paged_adamw_8bit

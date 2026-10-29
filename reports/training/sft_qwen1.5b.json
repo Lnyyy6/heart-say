@@ -1,0 +1,31 @@
+{
+  "stage": "sft",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "dataset_size": 60,
+  "epochs": 3,
+  "max_steps": 30,
+  "train_loss": 2.31505,
+  "last_logged_loss": 1.8709,
+  "elapsed_sec": 1418.8,
+  "elapsed_min": 23.6,
+  "peak_vram_gb": 10.31,
+  "device": "mps",
+  "gpu": "Apple MPS",
+  "max_seq_length": 512,
+  "use_4bit": false,
+  "lora": {
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ]
+  },
+  "output_dir": "outputs/sft-qwen1.5b"
+}

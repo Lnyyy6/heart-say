@@ -1,0 +1,22 @@
+{
+  "stage": "dpo",
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "sft_adapter": "outputs/sft-qwen1.5b",
+  "dataset_size": 30,
+  "beta": 0.1,
+  "train_loss": 0.01489,
+  "elapsed_sec": 68.8,
+  "peak_vram_gb": 9.47,
+  "device": "mps",
+  "use_4bit": false,
+  "max_length": 384,
+  "reward_history": [
+    {
+      "step": 10,
+      "rewards_chosen": 5.49609375,
+      "rewards_rejected": 0.253173828125,
+      "reward_accuracy": 1.0
+    }
+  ],
+  "output_dir": "outputs/dpo-qwen1.5b"
+}

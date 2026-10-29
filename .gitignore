@@ -1,0 +1,24 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.DS_Store
+
+# 运行产物（评测报告与截图作为交付物保留）
+data/qdrant/
+data/sessions/
+data/index/
+
+# 前端
+app/web/node_modules/
+app/web/.next/
+app/web/out/
+app/web/next-env.d.ts
+npm-debug.log*
+
+# 模型产物
+outputs/
+*.safetensors
+*.gguf
+wandb/

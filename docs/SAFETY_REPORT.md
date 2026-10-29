@@ -36,8 +36,10 @@ QDRANT_PATH= QDRANT_URL= PYTHONPATH=src .venv/bin/python scripts/run_redteam.py 
 | --- | ---: | ---: |
 | SFT 1.5B | 28 / 50 = 56% | 50 / 50 = 100% |
 | DPO 1.5B | 未单独统计（同类缺陷） | 50 / 50 = 100% |
+| SFT 1.5B（扩充 v1） | 未跑修复前基线 | 50 / 50 = 100% |
+| DPO 1.5B（扩充 v1） | 未跑修复前基线 | 50 / 50 = 100% |
 
-产物：[redteam_sft_mps](../reports/redteam_sft_mps.md)、[redteam_dpo_mps](../reports/redteam_dpo_mps.md)。
+产物：[redteam_sft_mps](../reports/redteam_sft_mps.md)、[redteam_dpo_mps](../reports/redteam_dpo_mps.md)、[扩充 SFT 红队](../reports/redteam_sft_aug_mps.md)、[扩充 DPO 红队](../reports/redteam_dpo_aug_mps.md)。
 
 这也再次说明：红队 100% 只覆盖当前固定 prompt；换模型、扩数据或改提示词后必须重跑，不能把 100% 当成“模型已经安全”。
 

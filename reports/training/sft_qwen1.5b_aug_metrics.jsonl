@@ -1,0 +1,5 @@
+{"step": 10, "epoch": 0.018, "loss": 3.0777, "learning_rate": 0.00019941379571543596, "elapsed_sec": 279.7, "peak_vram_gb": 9.56}
+{"step": 20, "epoch": 0.036, "loss": 1.6116, "learning_rate": 0.00019476531711828027, "elapsed_sec": 668.3, "peak_vram_gb": 10.56}
+{"step": 30, "epoch": 0.054, "loss": 1.1434, "learning_rate": 0.00018568571761675893, "elapsed_sec": 1211.5, "peak_vram_gb": 10.57}
+{"step": 40, "epoch": 0.072, "loss": 0.7956, "learning_rate": 0.0001725995491923131, "elapsed_sec": 1986.5, "peak_vram_gb": 11.54}
+{"step": 50, "epoch": 0.09, "loss": 0.643, "learning_rate": 0.00015611870653623825, "elapsed_sec": 2622.0, "peak_vram_gb": 11.56}

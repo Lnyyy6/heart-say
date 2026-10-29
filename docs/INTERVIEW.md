@@ -38,7 +38,7 @@
 - DPO：在 SFT adapter 上继续训练，beta=0.1、lr 5e-5、1 epoch；beta 扫 0.05/0.1/0.3，固定数据与 SFT 起点，只变一个变量。
 - 监控：loss、显存、训练时长、reward accuracy；每版都跑同一套 eval/redteam。若 DPO 没提升，保留负结果并分析（偏好对噪声、beta 过大、SFT 已饱和、评测维度不敏感）。
 
-**真实数字（1.5B / MPS）**：没有 CUDA，但在 M1 Pro 16GB 上用 fp32 LoRA 真跑了一轮：SFT 60 条、1 epoch、30 step、23.6min、峰值 10.31GB、train loss 2.315；DPO 30 对、1 epoch、15 step、1.1min、峰值 9.47GB、loss 0.015。同一套 100 条评测：base 4.15/85%、SFT 4.33/96%、DPO 4.31/98%。诚实边界：这是 1.5B + 小数据，不能外推到 7B；7B QLoRA、AWQ、vLLM 仍未跑，面试时不要编这些数字。
+**真实数字（1.5B / MPS）**：没有 CUDA，但在 M1 Pro 16GB 上用 fp32 LoRA 真跑了一轮：SFT 60 条、1 epoch、30 step、23.6min、峰值 10.31GB、train loss 2.315；DPO 30 对、1 epoch、15 step、1.1min、峰值 9.47GB、loss 0.015。同一套 100 条评测：base 4.15/85%、SFT 4.33/96%、DPO 4.31/98%。扩充数据版本：1110 条跑 50 step（≈9% epoch，43.7min，峰值 11.56GB，loss 3.08→0.643）得 4.60/100%；555 对 DPO 跑 60 step（≈22% epoch，15.3min，峰值 12.96GB）得 4.60/100%，DPO 没有提升均分，红队均 100%。诚实边界：这是 1.5B + 部分 epoch + 模板增强数据，评测句式与训练模板有重叠，不能外推到 7B；7B QLoRA、AWQ、vLLM 仍未跑，面试时不要编这些数字。
 
 ## 4. RAG 切分与 Rerank 怎么做？
 

@@ -889,6 +889,280 @@
       ]
     },
     {
+      "name": "sft_aug_mps",
+      "file": "eval_sft_aug_mps.json",
+      "generated_at": "2026-10-29T19:11:54.192155+00:00",
+      "cases": 100,
+      "use_rag": true,
+      "model": "Qwen/Qwen2.5-1.5B-Instruct + LoRA(outputs/sft-qwen1.5b-aug)",
+      "overall": 4.6,
+      "pass_rate": 1.0,
+      "dimensions": {
+        "empathy": 4.03,
+        "boundary": 5.0,
+        "safety": 4.64,
+        "hallucination": 4.3,
+        "persona": 4.68,
+        "preachiness": 4.99
+      },
+      "categories": [
+        {
+          "category": "boundary",
+          "label": "边界",
+          "cases": 16,
+          "overall": 4.7,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.94,
+            "boundary": 5.0,
+            "safety": 4.91,
+            "hallucination": 4.0,
+            "persona": 4.76,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "empathy",
+          "label": "共情",
+          "cases": 20,
+          "overall": 4.55,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.98,
+            "boundary": 5.0,
+            "safety": 5.0,
+            "hallucination": 4.42,
+            "persona": 4.75,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "hallucination",
+          "label": "事实/引用",
+          "cases": 11,
+          "overall": 4.52,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.91,
+            "boundary": 5.0,
+            "safety": 4.11,
+            "hallucination": 4.5,
+            "persona": 4.5,
+            "preachiness": 4.89
+          }
+        },
+        {
+          "category": "memory",
+          "label": "记忆",
+          "cases": 10,
+          "overall": 4.6,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 4.25,
+            "boundary": 5.0,
+            "safety": 4.1,
+            "hallucination": 4.45,
+            "persona": 4.7,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "persona",
+          "label": "人设",
+          "cases": 11,
+          "overall": 4.55,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 4.0,
+            "boundary": 5.0,
+            "safety": 4.32,
+            "hallucination": 4.45,
+            "persona": 4.53,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "preachiness",
+          "label": "说教感",
+          "cases": 9,
+          "overall": 4.66,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.83,
+            "boundary": 5.0,
+            "safety": 5.0,
+            "hallucination": 4.5,
+            "persona": 4.69,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "safety",
+          "label": "安全",
+          "cases": 23,
+          "overall": 4.64,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 4.17,
+            "boundary": 5.0,
+            "safety": 4.64,
+            "hallucination": 4.11,
+            "persona": 4.72,
+            "preachiness": 5.0
+          }
+        }
+      ],
+      "risk": {
+        "crisis_cases": 19,
+        "detected": 19,
+        "recall": 1.0,
+        "hotline_coverage": 1.0
+      },
+      "citation_rate": 0.61,
+      "latency_ms": {
+        "p50": 9967.5,
+        "p95": 42413.6
+      },
+      "failures": []
+    },
+    {
+      "name": "dpo_aug_mps",
+      "file": "eval_dpo_aug_mps.json",
+      "generated_at": "2026-10-29T19:33:35.917635+00:00",
+      "cases": 100,
+      "use_rag": true,
+      "model": "Qwen/Qwen2.5-1.5B-Instruct + LoRA(outputs/dpo-qwen1.5b-aug)",
+      "overall": 4.6,
+      "pass_rate": 1.0,
+      "dimensions": {
+        "empathy": 3.97,
+        "boundary": 5.0,
+        "safety": 4.65,
+        "hallucination": 4.31,
+        "persona": 4.66,
+        "preachiness": 4.99
+      },
+      "categories": [
+        {
+          "category": "boundary",
+          "label": "边界",
+          "cases": 16,
+          "overall": 4.7,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.94,
+            "boundary": 5.0,
+            "safety": 4.91,
+            "hallucination": 4.0,
+            "persona": 4.76,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "empathy",
+          "label": "共情",
+          "cases": 20,
+          "overall": 4.52,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.92,
+            "boundary": 5.0,
+            "safety": 5.0,
+            "hallucination": 4.42,
+            "persona": 4.66,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "hallucination",
+          "label": "事实/引用",
+          "cases": 11,
+          "overall": 4.5,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.5,
+            "boundary": 5.0,
+            "safety": 4.11,
+            "hallucination": 4.55,
+            "persona": 4.54,
+            "preachiness": 4.91
+          }
+        },
+        {
+          "category": "memory",
+          "label": "记忆",
+          "cases": 10,
+          "overall": 4.59,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 4.25,
+            "boundary": 5.0,
+            "safety": 4.1,
+            "hallucination": 4.45,
+            "persona": 4.65,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "persona",
+          "label": "人设",
+          "cases": 11,
+          "overall": 4.59,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 4.09,
+            "boundary": 5.0,
+            "safety": 4.39,
+            "hallucination": 4.45,
+            "persona": 4.57,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "preachiness",
+          "label": "说教感",
+          "cases": 9,
+          "overall": 4.61,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 3.72,
+            "boundary": 5.0,
+            "safety": 5.0,
+            "hallucination": 4.5,
+            "persona": 4.54,
+            "preachiness": 5.0
+          }
+        },
+        {
+          "category": "safety",
+          "label": "安全",
+          "cases": 23,
+          "overall": 4.64,
+          "pass_rate": 1.0,
+          "dimensions": {
+            "empathy": 4.17,
+            "boundary": 5.0,
+            "safety": 4.64,
+            "hallucination": 4.11,
+            "persona": 4.72,
+            "preachiness": 5.0
+          }
+        }
+      ],
+      "risk": {
+        "crisis_cases": 19,
+        "detected": 19,
+        "recall": 1.0,
+        "hotline_coverage": 1.0
+      },
+      "citation_rate": 0.61,
+      "latency_ms": {
+        "p50": 7746.4,
+        "p95": 26700.2
+      },
+      "failures": []
+    },
+    {
       "name": "rag",
       "file": "eval_rag.json",
       "generated_at": "2026-10-29T17:32:37.745722+00:00",

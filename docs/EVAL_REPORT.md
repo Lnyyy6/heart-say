@@ -1,6 +1,6 @@
 # 评测报告：从 65.7% 到 100% 的迭代复盘
 
-> 评测不是给模型发奖，而是找下一次该修什么。下面的数字来自当前离线演示（hash embedding + 规则 judge + 本地共情应答器），用于验证工程闭环，**不代表 Qwen2.5-7B + BGE-M3 的最终效果**。
+> 评测不是给模型发奖，而是找下一次该修什么。下面的数字来自当前离线演示（BGE-M3 / hash 降级 + 规则 judge + 本地共情应答器），用于验证工程闭环，**不代表 Qwen2.5-7B 的最终效果**。
 
 ## 1. 最终结果（100 条用例）
 
@@ -63,6 +63,23 @@
 - 训练原始证据：[SFT summary](../reports/training/sft_qwen1.5b.json) / [SFT metrics](../reports/training/sft_qwen1.5b_metrics.jsonl)、[DPO summary](../reports/training/dpo_qwen1.5b.json) / [DPO metrics](../reports/training/dpo_qwen1.5b_metrics.jsonl)。
 
 失败样本里最典型的是：SFT 模型在“被同学起外号”场景编出了“被堵、被要钱”的情节（eval-004），说明 60 条种子不足以覆盖语义，模型会把相似情绪套到错误事件上。这类幻觉不能靠 judge 提分掩盖，下一步应扩数据并加强事实约束。
+
+### 1.2 扩充数据 SFT/DPO（1110 条 / 555 对，受限训练）
+
+停掉 Docker 释放内存后，用扩充 v1 数据跑了 SFT 50 step（≈9% epoch，43.7 分钟，峰值 11.56GB，loss 3.08→0.643）和 DPO 60 step（≈22% epoch，15.3 分钟，峰值 12.96GB，loss 0.0038，reward accuracy 100%）。两次都因 16GB 统一内存的 swap 压力按检查点/步数上限提前停止，**不是完整 epoch**，不能当作 7B 或全量训练结果。
+
+| 阶段 | 均分 | 通过率 | 共情 | 幻觉/引用 | 红队 | P95 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Base 1.5B | 4.15 | 85% | 2.69 | - | - | 39.8s |
+| SFT（60 种子） | 4.33 | 96% | 3.04 | - | 100% | 42.3s |
+| SFT（扩充 v1） | **4.60** | **100%** | 4.03 | 4.30 | 100% | 42.4s |
+| DPO（扩充 v1） | **4.60** | 100% | 3.97 | 4.31 | 100% | 26.7s |
+
+- 扩充 SFT 相比 60 种子 SFT：总均分 +0.27、共情 +0.99、安全 4.64、边界 5.00、危机识别 100%（19/19）；红队 50 条仍为 100%。
+- 扩充 DPO 未提升总均分（4.60 → 4.60），共情 -0.06，幻觉 +0.01、安全 +0.01；与 30 对种子 DPO 一样，属于规则 judge + 小数据下的负结果，如实保留。
+- 风险提示：1050 条增强对话由模板与离线编排器生成，和评测用例的句式/结构有重叠，4.60 可能高估泛化；需要独立盲评与强模型合成数据才能定论。
+- 产物：[sft_aug_mps](../reports/eval_sft_aug_mps.md)、[dpo_aug_mps](../reports/eval_dpo_aug_mps.md)、[扩充 SFT 对比](../reports/sft_aug_comparison.md)、[扩充 DPO 对比](../reports/dpo_aug_comparison.md)、[SFT 红队](../reports/redteam_sft_aug_mps.md)、[DPO 红队](../reports/redteam_dpo_aug_mps.md)。
+- 训练原始证据：[SFT summary](../reports/training/sft_qwen1.5b_aug.json) / [metrics](../reports/training/sft_qwen1.5b_aug_metrics.jsonl)、[DPO summary](../reports/training/dpo_qwen1.5b_aug.json) / [metrics](../reports/training/dpo_qwen1.5b_aug_metrics.jsonl)。
 
 ## 2. 评测集怎么构成
 

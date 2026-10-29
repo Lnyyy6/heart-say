@@ -64,7 +64,7 @@ Judge 默认用规则评分，保证 CI 可复现；也支持 LLM-as-judge。规
 
 ## 没做完的部分
 
-- 没有 CUDA，但 1.5B 的 SFT/DPO 已在 M1 Pro 的 MPS 上真跑（SFT 23.6min / 10.3GB，DPO 1.1min / 9.5GB；base 4.15 → SFT 4.33 → DPO 4.31）；7B QLoRA、AWQ 的 TTFT/P95/显存仍未跑。
+- 没有 CUDA，但 1.5B 的 SFT/DPO 已在 M1 Pro 的 MPS 上真跑（SFT 23.6min / 10.3GB，DPO 1.1min / 9.5GB；base 4.15 → SFT 4.33 → DPO 4.31）；扩充数据版本在 16GB 内存下只跑到 SFT 50 step（≈9% epoch，4.60/100%）与 DPO 60 step（≈22% epoch，4.60/100%，未再提升），不是完整训练；7B QLoRA、AWQ 的 TTFT/P95/显存仍未跑。
 - 知识库 80 张来源卡派生 560 片段，数量达标但内容重叠；SFT 1110 / 偏好 555 是模板增强，不是强模型合成。
 - 人工抽检没有做到正式的双人 10-20%，只做了开发期抽看。
 - 3 分钟 Demo 已用 Playwright 自动录制（2:55，无旁白，内嵌字幕）；Docker Compose 已在本地跑通（无 GPU profile），云 GPU 未部署。

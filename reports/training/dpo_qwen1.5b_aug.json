@@ -1,0 +1,52 @@
+{
+  "stage": "dpo",
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "sft_adapter": "outputs/sft-qwen1.5b-aug",
+  "dataset_size": 555,
+  "beta": 0.1,
+  "train_loss": 0.00376,
+  "elapsed_sec": 917.4,
+  "peak_vram_gb": 12.96,
+  "device": "mps",
+  "use_4bit": false,
+  "max_length": 512,
+  "reward_history": [
+    {
+      "step": 10,
+      "rewards_chosen": 20.921875,
+      "rewards_rejected": -0.0753173828125,
+      "reward_accuracy": 1.0
+    },
+    {
+      "step": 20,
+      "rewards_chosen": 21.953125,
+      "rewards_rejected": -0.1866455078125,
+      "reward_accuracy": 1.0
+    },
+    {
+      "step": 30,
+      "rewards_chosen": 25.59375,
+      "rewards_rejected": -0.12005615234375,
+      "reward_accuracy": 1.0
+    },
+    {
+      "step": 40,
+      "rewards_chosen": 21.6875,
+      "rewards_rejected": -0.213623046875,
+      "reward_accuracy": 1.0
+    },
+    {
+      "step": 50,
+      "rewards_chosen": 25.4375,
+      "rewards_rejected": -0.285400390625,
+      "reward_accuracy": 1.0
+    },
+    {
+      "step": 60,
+      "rewards_chosen": 23.875,
+      "rewards_rejected": -0.27001953125,
+      "reward_accuracy": 1.0
+    }
+  ],
+  "output_dir": "outputs/dpo-qwen1.5b-aug"
+}

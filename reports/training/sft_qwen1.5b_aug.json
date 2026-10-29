@@ -1,0 +1,24 @@
+{
+  "stage": "sft",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "dataset_size": 1110,
+  "epochs": 1,
+  "max_steps": 50,
+  "completed_epoch_fraction": 0.09,
+  "train_loss": 1.45426,
+  "last_logged_loss": 0.643,
+  "elapsed_sec": 2622.0,
+  "elapsed_min": 43.7,
+  "peak_vram_gb": 11.56,
+  "device": "mps",
+  "gpu": "Apple MPS",
+  "max_seq_length": 512,
+  "use_4bit": false,
+  "lora": {
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05
+  },
+  "output_dir": "outputs/sft-qwen1.5b-aug",
+  "note": "按 save_steps=50 的检查点提前停止；1110 条仅覆盖约 9% 一个 epoch，非完整训练。"
+}

@@ -1,0 +1,21 @@
+# 1.5B 扩充数据的 DPO 配置；必须与 sft-qwen1.5b-aug 配对。
+base_model: Qwen/Qwen2.5-1.5B-Instruct
+sft_adapter: outputs/sft-qwen1.5b-aug
+dataset_path: data/preference/train_pairs.jsonl
+output_dir: outputs/dpo-qwen1.5b-aug
+seed: 42
+
+training:
+  beta: 0.1
+  num_train_epochs: 1
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 2
+  learning_rate: 5.0e-5
+  max_length: 512
+  max_prompt_length: 256
+  logging_steps: 10
+  save_steps: 50
+  save_total_limit: 2
+  warmup_ratio: 0.05
+  bf16: true
+  optim: paged_adamw_8bit

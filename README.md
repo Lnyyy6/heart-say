@@ -35,8 +35,10 @@
 | Base 1.5B | - | 4.15 | 85% | 原始 Instruct 模型 |
 | SFT | 60 条对话 | **4.33** | 96% | LoRA r16/α32，1 epoch，峰值 10.3GB |
 | DPO | 30 条偏好对 | 4.31 | **98%** | β=0.1，1 epoch，峰值 9.5GB |
+| SFT（扩充 v1） | 1110 条，50 step | **4.60** | 100% | ≈9% epoch，峰值 11.6GB，红队 100% |
+| DPO（扩充 v1） | 555 对，60 step | **4.60** | 100% | ≈22% epoch，P95 降至 26.7s，红队 100% |
 
-SFT 提升共情（2.69→3.04）、记忆与低说教感；DPO 把通过率再 +2pp、共情类到 95%，但总均分 -0.02，属于小数据下的噪声范围。这是真实小规模实验，不宣称已达到 7B 效果。详见 [Base vs SFT](reports/mps_sft_comparison.md)、[SFT vs DPO](reports/mps_dpo_comparison.md)。
+SFT 提升共情（2.69→3.04）、记忆与低说教感；DPO 把通过率再 +2pp、共情类到 95%，但总均分 -0.02，属于小数据下的噪声范围。扩充数据版本把 SFT 提到 4.60，DPO 未再提升（4.60 持平、共情 -0.06），如实保留负结果。受 16GB 内存限制，扩充训练只覆盖部分 epoch，且模板增强与评测风格存在重叠，分数应看作链路验证而非最终效果。详见 [Base vs SFT](reports/mps_sft_comparison.md)、[SFT vs DPO](reports/mps_dpo_comparison.md)、[扩充 SFT 对比](reports/sft_aug_comparison.md)、[扩充 DPO 对比](reports/dpo_aug_comparison.md)。
 
 **安全红队**：离线首轮 72% → 修复后 **100%（50/50）**；真实 1.5B SFT 首轮只有 **56%**，新增生成前的 `boundary` 固定边界节点后 SFT/DPO 均回到 **100%**。完整的“违规—根因—修复—残余风险”见 [安全报告](docs/SAFETY_REPORT.md)。
 
@@ -88,6 +90,15 @@ docker compose -f deploy/docker-compose.yml up --build
 ```
 
 默认 `LLM_BACKEND=offline`，使用可解释的本地共情应答器；它遵循同一套安全/风格约束，让 UI、RAG、评测与部署在没有 GPU 的环境里也能完整演示。
+
+### 切换 BGE-M3 检索（可选）
+
+```bash
+.venv/bin/pip install "sentence-transformers==3.3.1"
+EMBEDDING_BACKEND=bge-m3 EMBEDDING_DEVICE=auto make index   # 首次下载约 2GB 权重
+```
+
+Apple Silicon 会自动选 MPS，也可显式设为 `cpu` / `cuda`。默认 hash 向量零下载、可复现，适合 CI 与离线演示；BGE-M3 主报告为 4.65 / P95 188ms，hash 对照为 4.64，差异见 `reports/eval_rag.md`。
 
 ## 切换真实 Qwen / vLLM
 
@@ -269,8 +280,8 @@ make perf        # 压测本地 API（也可 --mode openai 压 vLLM）
 | 阶段 | 状态 | 说明 |
 | --- | --- | --- |
 | 第 1 周：baseline、数据、RAG 骨架 | 完成 | 80 张知识卡 / 560 片段、1110 条 SFT、555 偏好对、RAG demo、baseline 报告 |
-| 第 2 周：SFT、评测集、Agent MVP | 完成（1.5B 真实训练） | 60 条种子、100 条评测、LangGraph Agent；1.5B SFT 在 MPS 上跑通（4.33/96%）；7B 待 GPU |
-| 第 3 周：DPO、量化、安全 | 部分完成 | 1.5B DPO 在 MPS 上跑通（4.31/98%）、50 条红队 100%；AWQ/vLLM 待 GPU |
+| 第 2 周：SFT、评测集、Agent MVP | 完成（1.5B 真实训练） | 60 条种子、100 条评测、LangGraph Agent；1.5B SFT 在 MPS 上跑通（4.33/96%），扩充 1110 条跑 50 step（4.60/100%）；7B 待 GPU |
+| 第 3 周：DPO、量化、安全 | 部分完成 | 1.5B DPO 在 MPS 上跑通（30 对 4.31/98%，555 对 60 step 4.60/100%）、红队均 100%；AWQ/vLLM 待 GPU |
 | 第 4 周：部署、Demo、材料 | 完成（本地 Docker 栈已验证） | FastAPI + Next.js + Compose(web/api/Qdrant/Redis/Nginx) 已在 8080 跑通；2:55 Demo 视频已录制；云 GPU 未部署 |
 
 ## 设计取舍
@@ -283,7 +294,7 @@ make perf        # 压测本地 API（也可 --mode openai 压 vLLM）
 ## 已知局限
 
 - 知识库 80 张来源卡派生 560 片段，达到 500-1000 的数量目标，但派生片段与原文重叠，检索冗余与 P95 上升仍需评估；真实新来源仍只有 80 篇。
-- 真实训练只在 1.5B、60 条种子 SFT / 30 对偏好上完成 1 epoch；1110 条扩充数据的训练尝试因机器内存被其他进程占用而卡死，未产出 adapter；7B、AWQ、vLLM 未运行，不能把 1.5B 结果外推到 7B。
+- 真实训练只在 1.5B 上完成：60 条种子 SFT / 30 对偏好为 1 epoch；1110 条扩充数据在 16GB M1 Pro 上停掉 Docker 后跑到 50 step（≈9% epoch，loss 3.08→0.64）后因 swap 压力按检查点停止，555 对 DPO 跑 60 step（≈22% epoch），都不是完整训练；7B、AWQ、vLLM 未运行，不能把 1.5B 结果外推到 7B。
 - 评测 100 条、红队 50 条，规模有限；没有真实用户数据与临床验证。
 - 规则 judge 与人工评分相关性尚未量化；LLM judge 需单独配置。
 - 热点、热线与服务时间可能变化；上线前需核验 12356、120/110 与地区资源。

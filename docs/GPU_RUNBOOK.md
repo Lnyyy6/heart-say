@@ -28,14 +28,18 @@ LLM_BACKEND=transformers TRANSFORMERS_ADAPTER_PATH=outputs/dpo-qwen1.5b \
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | SFT | 60 条 | 1 epoch / 30 step | 23.6 min | 10.31 GB | 2.315 | 4.33 | 96% |
 | DPO | 30 对 | 1 epoch / 15 step | 1.1 min | 9.47 GB | 0.015 | 4.31 | 98% |
+| SFT（扩充 v1） | 1110 条 | 50 step ≈ 0.09 epoch | 43.7 min | 11.56 GB | 1.454（末条 0.643） | 4.60 | 100% |
+| DPO（扩充 v1） | 555 对 | 60 step ≈ 0.22 epoch | 15.3 min | 12.96 GB | 0.0038 | 4.60 | 100% |
 
 注意：这是 `transformers` + MPS 的本地串行推理，不是 vLLM 性能；P95 受共享机器负载影响，只作相对参考。产物在 `outputs/`（gitignore），报告在 `reports/eval_*_mps.md`。
 
-扩充数据 v1（1110 条 SFT / 555 偏好对）的配置是 `training/configs/sft_qwen1.5b_aug.yaml`。本机尝试 40 step 时因其他进程占用内存导致训练进程卡死，未产出 adapter；请在空闲机器上重跑：
+扩充数据 v1（1110 条 SFT / 555 偏好对）的配置是 `training/configs/sft_qwen1.5b_aug.yaml` 与 `dpo_qwen1.5b_aug.yaml`。在 16GB M1 Pro 上先停掉 Docker 释放内存，训练到 `save_steps=50` 检查点后提前停止并提升为最终 adapter；1110 条只覆盖约 9% 一个 epoch，**不是完整训练**。此前 40-step 尝试因其他进程占用内存卡死，本次同样受 swap 压力影响，完整 1 epoch 请在空闲 GPU/大内存机器重跑：
 
 ```bash
 python training/sft_qlora.py --config training/configs/sft_qwen1.5b_aug.yaml \
   --device mps --no-4bit --max-steps 150 --max-seq-length 512
+python training/dpo.py --config training/configs/dpo_qwen1.5b_aug.yaml \
+  --device mps --no-4bit --max-steps 60
 ```
 
 ## 0.2 环境（CUDA）
